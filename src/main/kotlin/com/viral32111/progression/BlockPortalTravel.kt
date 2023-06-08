@@ -17,11 +17,11 @@ fun blockPortalTravel( player: ServerPlayerEntity, destinationWorld: ServerWorld
 
 	if ( destinationDimension == World.NETHER && state.experienceCounter <= configuration.experienceThresholds.nether ) {
 		player.sendMessage( Text.of( configuration.chatMessages.nether ), false )
-		LOGGER.info( "Preventing player '${ player.displayName }' (${ player.uuidAsString }) from entering the nether as experience progress is only ${ state.experienceCounter } / ${ configuration.experienceThresholds.nether }." )
+		LOGGER.info( "Preventing player '${ player.displayName.string }' (${ player.uuidAsString }) from entering the nether as experience progress is only ${ state.experienceCounter } / ${ configuration.experienceThresholds.nether }." )
 		return ActionResult.FAIL
 	} else if ( destinationDimension == World.END && state.experienceCounter <= configuration.experienceThresholds.end ) {
 		player.sendMessage( Text.of( configuration.chatMessages.end ), false )
-		LOGGER.info( "Preventing player '${ player.displayName }' (${ player.uuidAsString }) from entering the end as experience progress is only ${ state.experienceCounter } / ${ configuration.experienceThresholds.end }." )
+		LOGGER.info( "Preventing player '${ player.displayName.string }' (${ player.uuidAsString }) from entering the end as experience progress is only ${ state.experienceCounter } / ${ configuration.experienceThresholds.end }." )
 		return ActionResult.FAIL
 	}
 

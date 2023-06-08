@@ -16,4 +16,5 @@ public class GainExperienceMixin {
 
 		GainExperienceCallback.Companion.getEVENT().invoker().interact( player, experience );
 	}
+
 }

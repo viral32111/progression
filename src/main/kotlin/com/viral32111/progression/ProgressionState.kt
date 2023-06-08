@@ -17,9 +17,9 @@ class ProgressionState : PersistentState() {
 		private const val KEY_EXPERIENCE_COUNTER = "experienceCounter"
 		private const val KEY_PLAYERS_HIDING_BOSS_BAR = "playersHidingProgressBar"
 
-		fun getProgressionState( server: MinecraftServer ): ProgressionState {
-			val persistentStateManager = server.overworld.persistentStateManager
-			return persistentStateManager.getOrCreate( ::createFromNbt, { ProgressionState() }, MOD_ID )
+		fun getProgressionState( server: MinecraftServer ): ProgressionState? {
+			val persistentStateManager = server.overworld?.persistentStateManager
+			return persistentStateManager?.getOrCreate( ::createFromNbt, { ProgressionState() }, MOD_ID )
 		}
 
 		private fun createFromNbt( nbt: NbtCompound ): ProgressionState {
@@ -28,9 +28,15 @@ class ProgressionState : PersistentState() {
 			progressionState.experienceCounter = nbt.getInt( KEY_EXPERIENCE_COUNTER )
 
 			val playersHidingProgressBarList = nbt.getList( KEY_PLAYERS_HIDING_BOSS_BAR, NbtElement.STRING_TYPE.toInt() )
-			for ( index: Int in 0 .. playersHidingProgressBarList.size ) {
-				val playerUUID = UUID.fromString( playersHidingProgressBarList.getString( index ) )
-				progressionState.playersHidingProgressBar.add( playerUUID )
+			for ( index: Int in 0 until playersHidingProgressBarList.size ) {
+				val uuidAsString = playersHidingProgressBarList.getString( index )
+				if ( uuidAsString.isEmpty() ) {
+					LOGGER.warn( "Skipping empty player UUID '${ uuidAsString }' from players hiding progress bar list!" )
+				} else {
+					val playerUUID = UUID.fromString( playersHidingProgressBarList.getString( index ) )
+					progressionState.playersHidingProgressBar.add( playerUUID )
+					LOGGER.info( "Progress bar will be hidden for player with UUID '${ playerUUID }'." )
+				}
 			}
 
 			LOGGER.info( "Created persistent state." )

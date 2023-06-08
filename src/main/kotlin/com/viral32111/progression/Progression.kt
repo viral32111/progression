@@ -11,11 +11,18 @@ import kotlinx.serialization.json.Json
 import net.fabricmc.api.DedicatedServerModInitializer
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
+import net.fabricmc.fabric.api.event.player.UseBlockCallback
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.fabricmc.loader.api.FabricLoader
+import net.minecraft.block.Block
+import net.minecraft.block.EndPortalBlock
+import net.minecraft.block.EndPortalFrameBlock
 import net.minecraft.entity.boss.BossBar
 import net.minecraft.entity.boss.ServerBossBar
+import net.minecraft.item.Items
+import net.minecraft.server.command.CommandManager.literal
 import net.minecraft.text.Text
+import net.minecraft.util.ActionResult
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.nio.file.StandardOpenOption
@@ -23,7 +30,6 @@ import kotlin.io.path.createDirectory
 import kotlin.io.path.notExists
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
-import net.minecraft.server.command.CommandManager.*
 
 @Suppress( "UNUSED" )
 class Progression: DedicatedServerModInitializer {
@@ -45,13 +51,27 @@ class Progression: DedicatedServerModInitializer {
 		var state = ProgressionState()
 
 		val bossBar: ServerBossBar = ServerBossBar(
-			Text.of( configuration.bossBarTitles.nether ),
+			Text.of( configuration.bossBarTitles.nether ), // Assume Nether is not unlocked yet
 			BossBar.Color.GREEN,
 			BossBar.Style.PROGRESS
 		)
 
-		fun isNetherUnlocked() = state.experienceCounter >= configuration.experienceThresholds.nether
-		fun isEndUnlocked() = state.experienceCounter >= configuration.experienceThresholds.end
+		private fun isNetherUnlocked() = state.experienceCounter >= configuration.experienceThresholds.nether
+		private fun isEndUnlocked() = state.experienceCounter >= configuration.experienceThresholds.end
+
+		fun updateBossBar() {
+			if ( !isNetherUnlocked() ) {
+				bossBar.name = Text.of( configuration.bossBarTitles.nether )
+				bossBar.isVisible = state.experienceCounter < configuration.experienceThresholds.nether
+				bossBar.percent = state.experienceCounter.toFloat() / configuration.experienceThresholds.nether
+			} else if ( isNetherUnlocked() && !isEndUnlocked() ) {
+				bossBar.name = Text.of( configuration.bossBarTitles.end )
+				bossBar.isVisible = state.experienceCounter < configuration.experienceThresholds.end
+				bossBar.percent = state.experienceCounter.toFloat() / configuration.experienceThresholds.end
+			} else {
+				bossBar.isVisible = false
+			}
+		}
 	}
 
 	override fun onInitializeServer() {
@@ -60,23 +80,7 @@ class Progression: DedicatedServerModInitializer {
 		configuration = loadConfigurationFile()
 
 		registerCallbackListeners()
-
-		// https://www.fabricmc.net/wiki/tutorial:event_index
-		ServerLifecycleEvents.SERVER_STARTING.register { server ->
-			state = ProgressionState.getProgressionState( server )
-			LOGGER.info( "Acquired persistent state from server (experience counter: ${ state.experienceCounter }, players hiding progress bar: ${ state.playersHidingProgressBar.size })." )
-		}
-
 		registerCommands()
-
-		ServerPlayConnectionEvents.JOIN.register { handler, _, server ->
-			//val state = ProgressionState.getProgressionState( server )
-			val player = handler.player
-
-			if ( !state.playersHidingProgressBar.contains( player.uuid ) ) {
-				bossBar.addPlayer( player )
-			}
-		}
 	}
 
 	private fun loadConfigurationFile(): Configuration {
@@ -118,7 +122,36 @@ class Progression: DedicatedServerModInitializer {
 		EnterPortalCallback.EVENT.register( ::blockPortalTravel )
 		GainExperienceCallback.EVENT.register( ::updateExperienceProgress )
 
-		LOGGER.info( "Registered callback listeners for mixins." );
+		// https://www.fabricmc.net/wiki/tutorial:event_index
+		ServerLifecycleEvents.SERVER_STARTED.register { server ->
+			state = ProgressionState.getProgressionState( server ) ?: throw RuntimeException( "Persistent state manager for Overworld is null" )
+			LOGGER.info( "Acquired persistent state from server (experience counter: ${ state.experienceCounter }, players hiding progress bar: ${ state.playersHidingProgressBar.size })." )
+
+			updateBossBar()
+		}
+
+		ServerPlayConnectionEvents.JOIN.register { handler, _, _ ->
+			//val state = ProgressionState.getProgressionState( server )
+			val player = handler.player
+
+			if ( !state.playersHidingProgressBar.contains( player.uuid ) ) {
+				bossBar.addPlayer( player )
+			}
+		}
+
+		UseBlockCallback.EVENT.register { player, world, hand, hitResult ->
+			val blockState = world.getBlockState( hitResult.blockPos )
+
+			if ( !isEndUnlocked() && blockState.block is EndPortalFrameBlock && player.getStackInHand( hand ).item == Items.ENDER_EYE ) {
+				player.sendMessage( Text.of( configuration.chatMessages.end ), false )
+				LOGGER.info( "Preventing player '${ player.displayName.string }' (${ player.uuidAsString }) from using end portal frame as experience progress is only ${ state.experienceCounter } / ${ configuration.experienceThresholds.end }." )
+				return@register ActionResult.FAIL
+			}
+
+			return@register ActionResult.PASS
+		}
+
+		LOGGER.info( "Registered callback listeners." );
 	}
 
 	private fun registerCommands() {
