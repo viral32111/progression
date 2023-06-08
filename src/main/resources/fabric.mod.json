@@ -1,0 +1,46 @@
+{
+	"schemaVersion": 1,
+
+	"id": "progression",
+	"version": "${ version }",
+
+	"name": "Progression",
+	"description": "Limits progression to other dimensions until global player experience thresholds are met.",
+	"authors": [ {
+		"name": "viral32111",
+		"contact": {
+			"homepage": "https://viral32111.com",
+			"email": "contact@viral32111.com"
+		}
+	} ],
+	"contributors": [],
+	"contact": {
+		"homepage": "https://github.com/viral32111/progression",
+		"sources": "https://github.com/viral32111/progression",
+		"issues": "https://github.com/viral32111/progression/issues"
+	},
+	"license": "",
+
+	"environment": "server",
+	"entrypoints": {
+		"server": [ {
+			"adapter": "kotlin",
+			"value": "com.viral32111.progression.Main"
+		} ]
+	},
+	"mixins": [ {
+		"environment": "server",
+		"config": "progression.mixins.json"
+	} ],
+
+	"depends": {
+		"java": ">=${ java }",
+		"minecraft": ">=${ minecraft }",
+		"fabricloader": ">=${ fabricloader }",
+		"fabric-api": ">=${ fabric_api }",
+		"fabric-language-kotlin": ">=${ fabric_language_kotlin }",
+		"events": ">=${ events }"
+	},
+	"suggests": {}
+
+}
