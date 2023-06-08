@@ -1,4 +1,4 @@
-# Database
+# Progression
 
 This is a [Minecraft Fabric](https://fabricmc.net/) mod that limits player progression to other dimensions until global player experience thresholds are met.
 
