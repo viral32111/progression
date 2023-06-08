@@ -1,6 +1,7 @@
 plugins {
 	id( "fabric-loom" )
 	kotlin( "jvm" ).version( System.getProperty( "kotlin_version" ) )
+	kotlin( "plugin.serialization" ) version( System.getProperty( "kotlin_version" ) )
 }
 
 base {
@@ -38,6 +39,9 @@ dependencies {
 
 	// My callbacks - https://github.com/viral32111/events
 	modImplementation( "com.viral32111", "events", project.extra[ "events_version" ] as String )
+
+	// Kotlin serialization
+	implementation( "org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.1" )
 
 }
 

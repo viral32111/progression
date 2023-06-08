@@ -25,7 +25,7 @@
 	"entrypoints": {
 		"server": [ {
 			"adapter": "kotlin",
-			"value": "com.viral32111.progression.Main"
+			"value": "com.viral32111.progression.Progression"
 		} ]
 	},
 	"mixins": [ {
