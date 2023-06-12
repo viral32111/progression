@@ -14,8 +14,6 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.event.player.UseBlockCallback
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.fabricmc.loader.api.FabricLoader
-import net.minecraft.block.Block
-import net.minecraft.block.EndPortalBlock
 import net.minecraft.block.EndPortalFrameBlock
 import net.minecraft.entity.boss.BossBar
 import net.minecraft.entity.boss.ServerBossBar
