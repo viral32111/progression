@@ -6,6 +6,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ExperienceThresholds(
-	@Required @SerialName( "nether" ) val nether: Int = 25000,
-	@Required @SerialName( "end" ) val end: Int = 75000
+	@Required @SerialName( "nether" ) val nether: Int = 5000,
+	@Required @SerialName( "end" ) val end: Int = 25000
 )
