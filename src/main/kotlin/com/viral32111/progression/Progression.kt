@@ -23,6 +23,7 @@ import net.minecraft.text.Text
 import net.minecraft.util.ActionResult
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.lang.IllegalStateException
 import java.nio.file.StandardOpenOption
 import kotlin.io.path.createDirectory
 import kotlin.io.path.notExists
@@ -70,10 +71,19 @@ class Progression: DedicatedServerModInitializer {
 				bossBar.isVisible = false
 			}
 		}
+
+		/**
+		 * Gets the current version of this mod.
+		 * @since 1.0.1
+		 */
+		fun getModVersion(): String =
+			FabricLoader.getInstance().getModContainer( MOD_ID ).orElseThrow {
+				throw IllegalStateException( "Mod container not found" )
+			}.metadata.version.friendlyString
 	}
 
 	override fun onInitializeServer() {
-		LOGGER.info( "Progression initialized on the server." )
+		LOGGER.info( "Progression v${ getModVersion() } initialized on the server." )
 
 		configuration = loadConfigurationFile()
 
@@ -163,6 +173,11 @@ class Progression: DedicatedServerModInitializer {
 				if ( player == null ) {
 					LOGGER.error( "Player is null within command execution!?" )
 					throw SimpleCommandExceptionType( Text.literal( "Something went horribly wrong while attempting to execute that command." ) ).create() // TODO: Should really be Text.translatable()
+				}
+
+				if ( isNetherUnlocked() && isEndUnlocked() ) {
+					player.sendMessage( Text.literal( "The Nether and End are already unlocked. No progress bar to toggle." ) )
+					return@executes 1
 				}
 
 				if ( state.playersHidingProgressBar.contains( player.uuid ) ) {
