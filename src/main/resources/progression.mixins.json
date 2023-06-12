@@ -10,8 +10,5 @@
 
 	"mixins": [],
 	"client": [],
-	"server": [
-		"EnterPortalMixin",
-		"GainExperienceMixin"
-	]
+	"server": []
 }

@@ -2,8 +2,8 @@ package com.viral32111.progression
 
 import com.mojang.brigadier.Command
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType
-import com.viral32111.progression.callback.EnterPortalCallback
-import com.viral32111.progression.callback.GainExperienceCallback
+import com.viral32111.events.callback.server.PlayerEnterPortalCallback
+import com.viral32111.events.callback.server.PlayerGainExperienceCallback
 import com.viral32111.progression.config.Configuration
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.encodeToString
@@ -117,8 +117,8 @@ class Progression: DedicatedServerModInitializer {
 	}
 
 	private fun registerCallbackListeners() {
-		EnterPortalCallback.EVENT.register( ::blockPortalTravel )
-		GainExperienceCallback.EVENT.register( ::updateExperienceProgress )
+		PlayerEnterPortalCallback.EVENT.register( ::blockPortalTravel )
+		PlayerGainExperienceCallback.EVENT.register( ::updateExperienceProgress )
 
 		// https://www.fabricmc.net/wiki/tutorial:event_index
 		ServerLifecycleEvents.SERVER_STARTED.register { server ->
