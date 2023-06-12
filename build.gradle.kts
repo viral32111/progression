@@ -14,8 +14,8 @@ repositories {
 	maven {
 		url = uri( "https://maven.pkg.github.com/viral32111/events" )
 		credentials {
-			username = System.getProperty( "gpr.user" ) ?: System.getenv( "USERNAME" )
-			password = System.getProperty( "gpr.key" ) ?: System.getenv( "TOKEN" )
+			username = project.findProperty( "gpr.user" ) as String? ?: System.getenv( "USER" )
+			password = project.findProperty( "gpr.key" ) as String? ?: System.getenv( "TOKEN" )
 		}
 	}
 }
