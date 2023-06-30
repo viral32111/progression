@@ -28,10 +28,7 @@
 			"value": "com.viral32111.progression.Progression"
 		} ]
 	},
-	"mixins": [ {
-		"environment": "server",
-		"config": "progression.mixins.json"
-	} ],
+	"mixins": [],
 
 	"depends": {
 		"java": ">=${ java }",
