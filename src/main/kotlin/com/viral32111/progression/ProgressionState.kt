@@ -8,7 +8,7 @@ import net.minecraft.nbt.NbtList
 import net.minecraft.nbt.NbtString
 import net.minecraft.server.MinecraftServer
 import net.minecraft.world.PersistentState
-import java.util.UUID
+import java.util.*
 
 // https://www.fabricmc.net/wiki/tutorial:persistent_states
 
@@ -17,9 +17,11 @@ class ProgressionState : PersistentState() {
 		private const val KEY_EXPERIENCE_COUNTER = "experienceCounter"
 		private const val KEY_PLAYERS_HIDING_BOSS_BAR = "playersHidingProgressBar"
 
+		private val myType: Type<ProgressionState> = Type<ProgressionState>({ ProgressionState() }, ProgressionState::createFromNbt, null )
+
 		fun getProgressionState( server: MinecraftServer ): ProgressionState? {
 			val persistentStateManager = server.overworld?.persistentStateManager
-			return persistentStateManager?.getOrCreate( ::createFromNbt, { ProgressionState() }, MOD_ID )
+			return persistentStateManager?.getOrCreate( myType, MOD_ID )
 		}
 
 		private fun createFromNbt( nbt: NbtCompound ): ProgressionState {
